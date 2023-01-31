@@ -1,7 +1,9 @@
+const fs = require('fs');
 const path = require('path');
 const prompt = require('prompt');
 const puppeteer = require('puppeteer');
 const { parse } = require('csv-parse/sync');
+const { stringify } = require('csv-stringify');
 var {
   Credential,
   ArgumentError,
@@ -155,15 +157,35 @@ async function getAllUser(page) {
  * นำเข้าบัญชีผู้ใช้ workD จากไฟล์ csv (เริ่มจากหน้า จัดการผู้ใช้งาน)
  * 
  * @param {puppeteer.Page} page 
- * @param {Buffer} inputFile ไฟล์ csv
+ * @param {string} inputFilePath ที่อยู่ไฟล์ csv ที่จะนำเข้า
+ * @param {string} outputFilePath ที่อยู่ไฟล์ csv ที่จะบันทึกรายการบัญชีผู้ที่นำเข้าแล้วพร้อมรหัสผ่าน
  * @returns {Promise<Array<any>>}
  */
-async function importWorkDUsers(page, inputFile) {
+async function importWorkDUsers(page, inputFilePath, outputFilePath) {
   console.log('info: processing CSV file');
+  const inputFile = await fs.promises.readFile(inputFilePath);
   const records = parse(inputFile, {
     bom: true,
     columns: true
   });
+  const outputFileStream = fs.createWriteStream(outputFilePath);
+  const stringifier = stringify({
+    header: true,
+    columns: [
+      'username',
+      'password',
+      'fname_th',
+      'lname_th',
+      'fname_en',
+      'lname_en',
+      'tel',
+      'mobile',
+      'cid',
+      'secondary_email',
+      'note'
+    ]
+  });
+  stringifier.pipe(outputFileStream);
   const importedUsers = [];
   for (const record of records) {
     // trycatch inside the loop, so it could continue when an error occured
@@ -238,10 +260,13 @@ async function importWorkDUsers(page, inputFile) {
         secondary_email: secondaryEmail,
         note: record.note.trim()
       };
-      importedUsers.push(importedUser)
+      stringifier.write(importedUser);
+      importedUsers.push(importedUser);
       console.log(`info: added user (${username})`);
     } catch (error) {
       handleError(error);
+    } finally {
+      stringifier.end();
     }
   }
   return importedUsers;

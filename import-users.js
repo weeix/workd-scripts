@@ -1,5 +1,3 @@
-const fs = require('fs').promises;
-const { stringify } = require('csv-stringify/sync');
 const puppeteer = require('puppeteer');
 
 const { 
@@ -21,7 +19,6 @@ const {
     const outputFilePath = inputFilePath.replace(/\.csv$/gi,'_imported.csv');
 
     console.log('info: reading CSV file');
-    const inputFile = await fs.readFile(inputFilePath);
 
     const credential = await promptCredential();
 
@@ -30,10 +27,7 @@ const {
     
     await logInWorkD(page, credential.username, credential.password);
     await openUserManagementPage(page);
-    const importedUsers = await importWorkDUsers(page, inputFile);
-    console.log('info: writing CSV file');
-    const contentCsv = stringify(importedUsers, {bom: true, header: true });
-    await fs.writeFile(outputFilePath, contentCsv);
+    await importWorkDUsers(page, inputFilePath, outputFilePath);
 
   } catch (error) {
     handleError(error);
