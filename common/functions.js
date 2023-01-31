@@ -121,7 +121,7 @@ async function openUserManagementPage(page) {
 async function openUserAddPage(page) {
   const userAddButton = await page.waitForSelector('xpath///a[contains(.,"เพิ่มผู้ใช้งาน")]');
   await userAddButton.click();
-  await page.waitForSelector('xpath///h1[contains(., "สร้างผู้ใช้งานใหม่")]');
+  await page.waitForSelector('xpath///input[@name="email"]');
   console.log('info: opened user add page');
 }
 
