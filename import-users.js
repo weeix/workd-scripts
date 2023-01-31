@@ -22,7 +22,7 @@ const {
 
     const credential = await promptCredential();
 
-    browser = await puppeteer.launch({ headless: false, slowMo: 20 });
+    browser = await puppeteer.launch();
     page = await browser.newPage();
     
     await logInWorkD(page, credential.username, credential.password);
