@@ -319,6 +319,10 @@ function evalClearAllUserInPage() {
   }
 }
 
+/**
+ * แสดงข้อความผิดพลาดที่เกิดขึ้น
+ * @param {Error} error ข้อความผิดพลาด
+ */
 function handleError(error) {
   if (error instanceof WorkDLogInError) {
     console.error(`error: workD login failure (${error.message})`);
